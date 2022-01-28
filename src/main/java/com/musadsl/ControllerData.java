@@ -1,7 +1,5 @@
 package com.musadsl;
 
-import com.bitwig.extension.controller.api.ControllerHost;
-
 class ControllerData {
 	private String oldControllerName = null;
 	private String controllerName = null;
@@ -34,13 +32,13 @@ class ControllerData {
 		oldControllerName = null;
 	}
 	
-	void dump(ControllerHost host, String label) {
-		host.println("| " + label);
-		host.println("|");
-		host.println("| controllerName " + controllerName);
-		host.println("| portName " + portName);
+	void dump(String label) {
+		Controller.log.info("| " + label);
+		Controller.log.info("|");
+		Controller.log.info("| controllerName " + controllerName);
+		Controller.log.info("| portName " + portName);
 		for(int i = 0; i < 16; i++) {
-			host.println("| channel " + i + " " + channelNames[i]);
+			Controller.log.info("| channel " + i + " " + channelNames[i]);
 		}
 	}
 }

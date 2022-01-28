@@ -13,6 +13,7 @@ import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
 import com.bitwig.extension.controller.api.SettableBooleanValue;
 import com.bitwig.extension.controller.api.SettableStringValue;
+import com.bitwig.extension.controller.api.Signal;
 
 /* RECORDAR PARA PONER LA VARIABLE DE DEBUG:
  * 
@@ -27,8 +28,12 @@ public class Controller extends ControllerExtension {
 	ControllerData controllerData = null;
 	OscHandler oscHandler = null;
 
+	static Logger log = null;
+	
 	private static List<Controller> controllers = new ArrayList<>();
 	private static Map<String, ControllerData> controllersData = new HashMap<>();
+	
+	private static ServerRunner serverRunner = null;
 	
 	private final ControllerHost host;
 
@@ -41,6 +46,11 @@ public class Controller extends ControllerExtension {
 		super(definition, host);
 		
 		this.host = host;
+		log = new Logger(host);
+		
+		if(serverRunner == null) {
+			serverRunner = new ServerRunner();
+		}
 	}
 	
 	@Override
@@ -122,13 +132,31 @@ public class Controller extends ControllerExtension {
 			controllersData.put(controllerName, controllerData);
 		} else {
 			controllerData.willRestart = false;
-			controllerData.dump(host, "Beginning init");
+			controllerData.dump("Beginning init");
 		}
 
 		host.showPopupNotification("MusaLCE Initialized! (" + controllerName + ")");
 
 		controllers.add(this);
 		
+		/*
+		 * Server Startup/Shutdown
+		 * 
+		 * 
+		 * */
+		
+		if(controllerData.isOscHost) {
+			Signal startServerSignal = host.getPreferences().getSignalSetting(" ", "Server", "Start");
+			startServerSignal.addSignalObserver(() -> {
+				serverRunner.run();
+			});
+			
+			Signal killServerSignal = host.getPreferences().getSignalSetting("  ", "Server", "Shutdown");
+			killServerSignal.addSignalObserver(() -> {
+				serverRunner.kill();
+			});
+		}
+
 		/* 
 		 * Port Name Configuration 
 		 * 
@@ -184,7 +212,7 @@ public class Controller extends ControllerExtension {
 		 * 
 		 * */
 		
-		controllerData.dump(host, "Before midi port creation");
+		controllerData.dump("Before midi port creation");
 
 		if(controllerData.portName != null) {
 

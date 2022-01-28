@@ -84,7 +84,7 @@ public class OscHandler {
 						musalceserver.endBundle();
 						
 					} catch (OscInvalidArgumentTypeException | IOException e) {
-						host.errorln(e.getLocalizedMessage());
+						Controller.log.error(e.getLocalizedMessage());
 					}
 				});
 
@@ -92,16 +92,16 @@ public class OscHandler {
 		try {
 			localserver.start(10001);
 		} catch (IOException e) {
-			host.errorln(e.getLocalizedMessage());
+			Controller.log.error(e.getLocalizedMessage());
 		}
 		
 		application.projectName().addValueObserver(newValue -> {
 			if(!newValue.isEmpty()) {
 				try {
 					musalceserver.sendMessage("/hello", newValue);
-					host.println("Sent hello");
+					Controller.log.info("Sent hello");
 				} catch (OscInvalidArgumentTypeException | IOException e) {
-					host.errorln(e.getLocalizedMessage());
+					Controller.log.error(e.getLocalizedMessage());
 				}
 			}
 		});
