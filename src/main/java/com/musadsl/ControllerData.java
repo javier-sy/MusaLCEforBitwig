@@ -33,12 +33,12 @@ class ControllerData {
 	}
 	
 	void dump(String label) {
-		Controller.log.info("| " + label);
-		Controller.log.info("|");
-		Controller.log.info("| controllerName " + controllerName);
-		Controller.log.info("| portName " + portName);
+		Controller.log.info("controller", "| " + label);
+		Controller.log.info("controller", "|");
+		Controller.log.info("controller", "| controllerName " + controllerName);
+		Controller.log.info("controller", "| portName " + portName);
 		for(int i = 0; i < 16; i++) {
-			Controller.log.info("| channel " + i + " " + channelNames[i]);
+			Controller.log.info("controller", "| channel " + i + " " + channelNames[i]);
 		}
 	}
 }

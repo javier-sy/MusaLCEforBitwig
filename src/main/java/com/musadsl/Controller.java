@@ -55,7 +55,7 @@ public class Controller extends ControllerExtension {
 	
 	@Override
 	public void init() {
-		log.info("\ninit() started");
+		log.info("controller", "\ninit() started");
 
 		/* 
 		 * Controller Attributes 
@@ -68,7 +68,7 @@ public class Controller extends ControllerExtension {
 		controllerNameParameter.addValueObserver(newValue -> {
 			Controller alreadyExistingController = findControllerByName(newValue);
 			
-			log.info("controllerNameParameter observer: new value " + newValue + " (old value " + controllerName + ")");
+			log.info("controller", "controllerNameParameter observer: new value " + newValue + " (old value " + controllerName + ")");
 			
 			if(!(newValue.isBlank() || newValue.isEmpty())) {
 				
@@ -122,12 +122,12 @@ public class Controller extends ControllerExtension {
 
 		controllerName = controllerNameParameter.get();
 		
-		log.info("controllerName = " + controllerName);
+		log.info("controller", "controllerName = " + controllerName);
 
 		controllerData = getControllerData();
 		
 		if(controllerData == null) {
-			log.info("Beginning init: controllerData == null... Creating a ControllerData for " + controllerName);
+			log.info("controller", "Beginning init: controllerData == null... Creating a ControllerData for " + controllerName);
 			controllerData = new ControllerData(controllerName);
 			controllersData.put(controllerName, controllerData);
 		} else {
@@ -168,12 +168,12 @@ public class Controller extends ControllerExtension {
 				host.getDocumentState().getStringSetting("Name","Port", 32, portName);
 		
 		
-		log.info("portNameParameter.get() = " + portNameParameter.get());
+		log.info("controller", "portNameParameter.get() = " + portNameParameter.get());
 		
 		final ControllerData finalControllerData = controllerData;
 		
 		portNameParameter.addValueObserver(newValue -> {
-			log.info("portNameParameter.observer: new value " + newValue + " (old value " + finalControllerData.portName + ")");
+			log.info("controller", "portNameParameter.observer: new value " + newValue + " (old value " + finalControllerData.portName + ")");
 
 			boolean shouldRestart = !newValue.equals(finalControllerData.portName);
 			
@@ -197,7 +197,7 @@ public class Controller extends ControllerExtension {
 			channelNameParameters[ii] = host.getDocumentState().getStringSetting("Channel " + ii, "Channels", 32, channelName);
 			
 			channelNameParameters[ii].addValueObserver(newValue -> { 
-				log.info("channelNameParameters[" + ii + "].observer: new value " + newValue + " (old value " + controllerData.channelNames[ii] + ")");
+				log.info("controller", "channelNameParameters[" + ii + "].observer: new value " + newValue + " (old value " + controllerData.channelNames[ii] + ")");
 				
 				boolean shouldRestart = !newValue.equals(controllerData.channelNames[ii]);
 				
@@ -225,9 +225,9 @@ public class Controller extends ControllerExtension {
 						controllerData.channelNames[i], "?" + Integer.toHexString(i) + "????");
 			}
 			
-			log.info("Created midi ports");
+			log.info("controller", "Created midi ports for " + controllerName);
 		} else {
-			log.info("Skipped creation of midi ports");
+			log.info("controller", "Skipped creation of midi ports for " + controllerName);
 		}
 		
 		
@@ -239,12 +239,12 @@ public class Controller extends ControllerExtension {
 		if(controllerData.isOscHost) {
 			if(controllerData.portName != null) {
 				oscHandler = new OscHandler(host.getOscModule(), controllersData, host);
-				log.info("Created OSC link for " + controllerName);
+				log.info("controller", "Created OSC link for " + controllerName);
 			} else {
-				log.info("Skipped creation of OSC link because controller data is still uninitialized for " + controllerName);
+				log.info("controller", "Skipped creation of OSC link because controller data is still uninitialized for " + controllerName);
 			}
 		} else {
-			log.info("Skipped creation of OSC link because OSC is disabled for " + controllerName);
+			log.info("controller", "Skipped creation of OSC link because OSC is disabled for " + controllerName);
 		}
 		
 		/* 
@@ -259,7 +259,7 @@ public class Controller extends ControllerExtension {
 					controller.oscHandler.updateControllerData(controllerData);
 				}
 			} else {
-				log.info("Couldn't update status for " + controllerName + " because there is no OscHost (yet)");
+				log.info("controller", "Couldn't update status for " + controllerName + " because there is no OscHost (yet)");
 			}
 			controllerData.shouldNotifyOschHost = false;
 		}
@@ -269,7 +269,7 @@ public class Controller extends ControllerExtension {
 		 * 
 		 * */
 		
-		log.info("init() finished\n");
+		log.info("controller", "init() finished\n");
 	}
 	
 	private Controller findOscHost() {
@@ -287,14 +287,14 @@ public class Controller extends ControllerExtension {
 			
 			Executors.newSingleThreadScheduledExecutor().schedule(
 					() -> { 
-						log.info("Restarting now");
+						log.info("controller", "Restarting now");
 						host.restart(); 
 					}, 1, TimeUnit.SECONDS);
 			
 			controllerData.willRestart = true;
 			controllerData.shouldNotifyOschHost = true;
 		} else {
-			log.info("Restart already scheduled...");
+			log.info("controller", "Restart already scheduled...");
 		}
 	}
 

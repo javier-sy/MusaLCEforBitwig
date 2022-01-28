@@ -9,11 +9,11 @@ public class Logger {
 		this.host = host;
 	}
 	
-	public void info(String s) {
-		host.println(s);
+	public void info(String module, String s) {
+		host.println("[" + module + "] " + s);
 	}
 	
-	public void error(String s ) {
-		host.errorln(s);
+	public void error(String module, String s ) {
+		host.errorln("[" + module + "] " + s);
 	}
 }

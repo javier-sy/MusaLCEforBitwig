@@ -26,25 +26,25 @@ public class ServerRunner {
 		try {
 			process = builder.start();
 			
-			Controller.log.info("Launched server");
+			Controller.log.info("server", "Launched server");
 			
 			StreamGobbler streamGobblerStdout = 
 				new StreamGobbler(process.getInputStream(),
 					t -> {
-						Controller.log.info("[SERVER] " + t);
+						Controller.log.info("server", t);
 					});
 			
 			StreamGobbler streamGobblerStderr = 
 					new StreamGobbler(process.getErrorStream(),
 						t -> {
-							Controller.log.info("[SERVER] " + t);
+							Controller.log.info("server", t);
 						});
 
 			Executors.newSingleThreadExecutor().submit(streamGobblerStdout);
 			Executors.newSingleThreadExecutor().submit(streamGobblerStderr);
 
 		} catch (IOException e) {
-			Controller.log.error("Error launching server: " + e.getLocalizedMessage());
+			Controller.log.error("server", "Error launching server: " + e.getLocalizedMessage());
 		}
 	}
 	
@@ -54,20 +54,20 @@ public class ServerRunner {
 				try {
 					process.getInputStream().close();
 				} catch (IOException e) {
-					Controller.log.error("Closing server process: " + e.getLocalizedMessage());
+					Controller.log.error("server", "Closing server process: " + e.getLocalizedMessage());
 				}
 				try {
 					process.getErrorStream().close();
 				} catch (IOException e) {
-					Controller.log.error("Closing server process: " + e.getLocalizedMessage());
+					Controller.log.error("server", "Closing server process: " + e.getLocalizedMessage());
 				}
 
 				process.destroy();
 
-				Controller.log.info("Server shutdown");
+				Controller.log.info("server", "Server shutdown");
 			} else {
 				process.destroyForcibly();
-				Controller.log.error("Forced server shutdown");
+				Controller.log.error("server", "Forced server shutdown");
 			}
 			
 		}

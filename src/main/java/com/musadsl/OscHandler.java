@@ -66,10 +66,7 @@ public class OscHandler {
 				"*", 
 				"Returns Controllers and Ports. The client is expected to implement /musalce4bitwig/controller and /musalce4bitwig/port to receive the responses.", 
 				(source, message) -> {
-					host.println("/musalce4bitwig/controllers: " + 
-							message.getAddressPattern() + " - " + 
-							message.getTypeTag() + " - " + 
-							message.getArguments()); 
+					Controller.log.info("osc_handler", "Received /musalce4bitwig/controllers"); 
 		
 					try {
 						musalceserver.startBundle();
@@ -84,7 +81,7 @@ public class OscHandler {
 						musalceserver.endBundle();
 						
 					} catch (OscInvalidArgumentTypeException | IOException e) {
-						Controller.log.error(e.getLocalizedMessage());
+						Controller.log.error("osc_handler", e.getLocalizedMessage());
 					}
 				});
 
@@ -92,16 +89,16 @@ public class OscHandler {
 		try {
 			localserver.start(10001);
 		} catch (IOException e) {
-			Controller.log.error(e.getLocalizedMessage());
+			Controller.log.error("osc_handler", e.getLocalizedMessage());
 		}
 		
 		application.projectName().addValueObserver(newValue -> {
 			if(!newValue.isEmpty()) {
 				try {
 					musalceserver.sendMessage("/hello", newValue);
-					Controller.log.info("Sent hello");
+					Controller.log.info("osc_handler", "Sent hello");
 				} catch (OscInvalidArgumentTypeException | IOException e) {
-					Controller.log.error(e.getLocalizedMessage());
+					Controller.log.error("osc_handler", e.getLocalizedMessage());
 				}
 			}
 		});
