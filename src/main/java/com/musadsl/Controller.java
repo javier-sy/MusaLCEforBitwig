@@ -55,10 +55,10 @@ public class Controller extends ControllerExtension {
 	
 	@Override
 	public void init() {
-		log.info("controller", "\ninit() started");
+		log.info("controller", "init() started");
 
 		/* 
-		 * Controller Attributes 
+		 * Controller Name Attribute 
 		 * 
 		 * */
 		
@@ -82,37 +82,16 @@ public class Controller extends ControllerExtension {
 					controllersData.put(controllerName, controllerData);
 
 				} else {
-					host.showPopupNotification("Controller name '" + newValue + "' already in use.");
+					popup("Controller name '" + newValue + "' already in use", false);
 					controllerNameParameter.set(controllerName);
 				}
 				
 				if(shouldRestart) { delayedRestart(); }
 			} else {
-				host.showPopupNotification("Controller name can't be empty.");
+				popup("Controller name can't be empty", false);
 				controllerNameParameter.set(controllerName);
 			}
 			
-		});
-		
-		SettableBooleanValue oscHostParameter = host.getPreferences().getBooleanSetting("Osc Host", "Configuration", false);
-		
-		oscHostParameter.addValueObserver(newValue -> {
-			if(newValue != controllerData.isOscHost) {
-				controllerData.isOscHost = newValue;
-				if(!newValue) {
-					oscHandler.unlink();
-					oscHandler = null;
-				}
-				delayedRestart();
-			}
-		});
-		
-		SettableBooleanValue clockSenderkParameter = host.getPreferences().getBooleanSetting("Clock Sender", "Configuration", false);
-		clockSenderkParameter.addValueObserver(newValue -> {
-			if(newValue != controllerData.isClockSender) {
-				controllerData.isClockSender = newValue;
-				delayedRestart();
-			}
 		});
 		
 		/* 
@@ -135,27 +114,73 @@ public class Controller extends ControllerExtension {
 			controllerData.dump("Beginning init");
 		}
 
-		host.showPopupNotification("MusaLCE Initialized! (" + controllerName + ")");
+		popup("MusaLCE Initialized! (" + controllerName + ")", false);
 
 		controllers.add(this);
 		
-		/*
-		 * Server Startup/Shutdown
+
+		
+		/* 
+		 * Controller Attributes: Osc Host, Clock Sender and Start Server toggles 
 		 * 
+		 * */
+
+		host.getPreferences().getBooleanSetting("Osc Host", "Configuration", false).addValueObserver(newValue -> {
+			if(newValue != controllerData.isOscHost) {
+				controllerData.isOscHost = newValue;
+				if(!newValue) {
+					oscHandler.unlink();
+					oscHandler = null;
+				}
+				delayedRestart();
+			}
+		});
+		
+		host.getPreferences().getBooleanSetting("Clock Sender", "Configuration", false).addValueObserver(newValue -> {
+			if(newValue != controllerData.isClockSender) {
+				controllerData.isClockSender = newValue;
+				delayedRestart();
+			}
+		});
+		
+		host.getPreferences().getBooleanSetting("Start Server", "Server", false).addValueObserver(newValue -> {
+			if(controllerData.isOscHost) {
+				if(newValue != controllerData.startServer) {
+					controllerData.startServer = newValue;
+					delayedRestart();
+				}
+			} else {
+				if(newValue != controllerData.startServer) {
+					controllerData.startServer = newValue;
+					popup("Ignored parameter 'Start Server': it's used only when 'Osc Host' is enabled", false);
+				}
+			}
+		});
+		
+		/*
+		 * Server Reload Button
 		 * 
 		 * */
 		
-		if(controllerData.isOscHost) {
-			Signal startServerSignal = host.getPreferences().getSignalSetting(" ", "Server", "Start");
-			startServerSignal.addSignalObserver(() -> {
+		host.getPreferences().getSignalSetting(" ", "Server", "Reload").addSignalObserver(() -> {
+			if(controllerData.isOscHost && controllerData.startServer) {
+				if(serverRunner.isRunning()) {
+					popup("Stopping MusaLCEServer...", false);
+					serverRunner.kill();
+					popup("MusaLCEServer stopped", false);
+				}
+				
+				try {
+					TimeUnit.SECONDS.sleep(1);
+				} catch (InterruptedException e) { }
+				
 				serverRunner.run();
-			});
+				popup("MusaLCEServer reloaded", false);
+			} else {
+				popup("Ignored action 'Restart': it does the action only when 'Osc Host' and 'Start Server' are both enabled", false);
+			}
 			
-			Signal killServerSignal = host.getPreferences().getSignalSetting("  ", "Server", "Shutdown");
-			killServerSignal.addSignalObserver(() -> {
-				serverRunner.kill();
-			});
-		}
+		});
 
 		/* 
 		 * Port Name Configuration 
@@ -173,13 +198,7 @@ public class Controller extends ControllerExtension {
 		final ControllerData finalControllerData = controllerData;
 		
 		portNameParameter.addValueObserver(newValue -> {
-			log.info("controller", "portNameParameter.observer: new value " + newValue + " (old value " + finalControllerData.portName + ")");
-
-			boolean shouldRestart = !newValue.equals(finalControllerData.portName);
-			
 			finalControllerData.portName = newValue;
-			
-			if(shouldRestart) { delayedRestart(); }
 		});
 		
 		/* 
@@ -197,15 +216,13 @@ public class Controller extends ControllerExtension {
 			channelNameParameters[ii] = host.getDocumentState().getStringSetting("Channel " + ii, "Channels", 32, channelName);
 			
 			channelNameParameters[ii].addValueObserver(newValue -> { 
-				log.info("controller", "channelNameParameters[" + ii + "].observer: new value " + newValue + " (old value " + controllerData.channelNames[ii] + ")");
-				
-				boolean shouldRestart = !newValue.equals(controllerData.channelNames[ii]);
-				
 				controllerData.channelNames[ii] = newValue;
-				
-				if(shouldRestart) { delayedRestart(); }
 			});
 		}
+		
+		host.getDocumentState().getSignalSetting(" ", "Save", "Save Changes").addSignalObserver(() -> {
+			delayedRestart();
+		});
 		
 		/* 
 		 * Midi Port Redirection 
@@ -238,13 +255,32 @@ public class Controller extends ControllerExtension {
 		
 		if(controllerData.isOscHost) {
 			if(controllerData.portName != null) {
-				oscHandler = new OscHandler(host.getOscModule(), controllersData, host);
+				oscHandler = new OscHandler(host.getOscModule(), controllersData, host, host.createTransport());
 				log.info("controller", "Created OSC link for " + controllerName);
 			} else {
 				log.info("controller", "Skipped creation of OSC link because controller data is still uninitialized for " + controllerName);
 			}
 		} else {
 			log.info("controller", "Skipped creation of OSC link because OSC is disabled for " + controllerName);
+		}
+		
+		/* 
+		 * Start/Stop MusaLCE Server
+		 * 
+		 *  */
+		
+		if(controllerData.startServer) {
+			if(serverRunner.isRunning()) {
+				popup("MusaLCEServer already started", false);
+			} else {
+				serverRunner.run();
+				popup("MusaLCEServer started", false);
+			}
+		} else {
+			if(serverRunner.isRunning()) {
+				serverRunner.kill();
+				popup("MusaLCEServer stopped", false);
+			}
 		}
 		
 		/* 
@@ -288,6 +324,7 @@ public class Controller extends ControllerExtension {
 			Executors.newSingleThreadScheduledExecutor().schedule(
 					() -> { 
 						log.info("controller", "Restarting now");
+						controllerData.shouldKillServer = false;
 						host.restart(); 
 					}, 1, TimeUnit.SECONDS);
 			
@@ -297,11 +334,19 @@ public class Controller extends ControllerExtension {
 			log.info("controller", "Restart already scheduled...");
 		}
 	}
-
+	
 	@Override
 	public void exit() {
+		if(controllerData.shouldKillServer && serverRunner.isRunning()) { 
+			serverRunner.kill(); 
+			popup("MusaLCE Server stopped", true);
+		}
+		
 		controllers.remove(this);
-		getHost().showPopupNotification("MusaLCE Exited (" + controllerName + ")");
+
+		controllerData.shouldKillServer = true;
+
+		popup("MusaLCE Exited (" + controllerName + ")", true);
 	}
 
 	@Override
@@ -336,5 +381,15 @@ public class Controller extends ControllerExtension {
 		}
 		
 		return null;
+	}
+
+	private void popup(String message, boolean wait) {
+		getHost().showPopupNotification(message);
+
+		if(wait) {
+			try {
+				TimeUnit.SECONDS.sleep(1);
+			} catch (InterruptedException e) { }
+		}
 	}
 }

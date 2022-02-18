@@ -11,8 +11,10 @@ class ControllerData {
 	
 	boolean isOscHost = false;
 	boolean isClockSender = false;
+	boolean startServer = false;
 	
 	boolean shouldNotifyOschHost = false;
+	boolean shouldKillServer = true;
 	
 	ControllerData(String controllerName) {
 		this.controllerName = controllerName;

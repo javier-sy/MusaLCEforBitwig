@@ -10,13 +10,12 @@ import com.bitwig.extension.api.opensoundcontrol.OscModule;
 import com.bitwig.extension.api.opensoundcontrol.OscServer;
 import com.bitwig.extension.controller.api.Application;
 import com.bitwig.extension.controller.api.ControllerHost;
+import com.bitwig.extension.controller.api.Transport;
 
 public class OscHandler {
 
-	final private OscModule osc;
-	final private Map<String, ControllerData> controllers;
 	final private ControllerHost host;
-	
+
 	private OscServer localserver;
 	private OscConnection musalceserver;
 	private Application application;
@@ -51,22 +50,39 @@ public class OscHandler {
 	transport.timeSignature();
 	*/
 
-	public OscHandler(OscModule osc, Map<String, ControllerData> controllers, ControllerHost host) {
-		this.osc = osc;
-		this.controllers = controllers;
+	public OscHandler(OscModule osc, Map<String, ControllerData> controllers, ControllerHost host, Transport transport) {
 		this.host = host;
 		
 		application = host.createApplication();
+		
+		transport.isPlaying().markInterested();
+		transport.playStartPosition().markInterested();
 		
 		musalceserver = osc.connectToUdpServer("localhost", 11011, null);
 
 		OscAddressSpace addressSpace = osc.createAddressSpace();
 		
-		addressSpace.registerMethod("/musalce4bitwig/controllers", 
+		addressSpace.registerMethod("/version", 
+				"*", 
+				"Receives the version of MusaLCEServer", 
+				(source, message) -> {
+					Controller.log.info("controller", "Received /version " + message.getString(0));
+				});
+
+		addressSpace.registerMethod("/reload", 
+				"*", 
+				"Reload the controller and restarts MusaLCEServer if it was already started (useful for testing changes in MusaDSL)", 
+				(source, message) -> {
+					Controller.log.info("controller", "Restarting controller...");
+					
+					host.restart();
+				});
+
+		addressSpace.registerMethod("/musalce4bitwig/sync", 
 				"*", 
 				"Returns Controllers and Ports. The client is expected to implement /musalce4bitwig/controller and /musalce4bitwig/port to receive the responses.", 
 				(source, message) -> {
-					Controller.log.info("osc_handler", "Received /musalce4bitwig/controllers"); 
+					Controller.log.info("controller", "Received /musalce4bitwig/sync"); 
 		
 					try {
 						musalceserver.startBundle();
@@ -81,24 +97,59 @@ public class OscHandler {
 						musalceserver.endBundle();
 						
 					} catch (OscInvalidArgumentTypeException | IOException e) {
-						Controller.log.error("osc_handler", e.getLocalizedMessage());
+						Controller.log.error("controller", e.getLocalizedMessage());
 					}
+				});
+		
+		addressSpace.registerMethod("/musalce4bitwig/play", 
+				"*", 
+				"Start playing the song", 
+				(source, message) -> { 
+					if(!transport.isPlaying().get()) {
+						transport.jumpToPlayStartPosition();
+						transport.play(); 
+					}
+				});
+		
+		addressSpace.registerMethod("/musalce4bitwig/stop", 
+				"*", 
+				"Stop playing the song", 
+				(source, message) -> { 
+					if(transport.isPlaying().get()) {
+						transport.stop();
+					}
+				});
+
+		addressSpace.registerMethod("/musalce4bitwig/continue", 
+				"*", 
+				"Continue playing the song", 
+				(source, message) -> { 
+					if(!transport.isPlaying().get()) {
+						transport.continuePlayback();
+					}
+				});
+
+		addressSpace.registerMethod("/musalce4bitwig/goto", 
+				"*", 
+				"Sets the play position of the song", 
+				(source, message) -> { 
+					transport.playStartPosition().set((double)message.getDouble(0));
 				});
 
 		localserver = osc.createUdpServer(addressSpace);
 		try {
 			localserver.start(10001);
 		} catch (IOException e) {
-			Controller.log.error("osc_handler", e.getLocalizedMessage());
+			Controller.log.error("controller", e.getLocalizedMessage());
 		}
 		
 		application.projectName().addValueObserver(newValue -> {
 			if(!newValue.isEmpty()) {
 				try {
 					musalceserver.sendMessage("/hello", newValue);
-					Controller.log.info("osc_handler", "Sent hello");
+					Controller.log.info("controller", "Sent /hello");
 				} catch (OscInvalidArgumentTypeException | IOException e) {
-					Controller.log.error("osc_handler", e.getLocalizedMessage());
+					Controller.log.error("controller", e.getLocalizedMessage());
 				}
 			}
 		});
