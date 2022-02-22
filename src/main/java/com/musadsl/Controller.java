@@ -152,7 +152,7 @@ public class Controller extends ControllerExtension {
 			} else {
 				if(newValue != controllerData.startServer) {
 					controllerData.startServer = newValue;
-					popup("Ignored parameter 'Start Server': it's used only when 'Osc Host' is enabled", false);
+					popup("Ignored parameter 'Start Server': 'Osc Host' is not enabled for this controller", false);
 				}
 			}
 		});
@@ -177,7 +177,7 @@ public class Controller extends ControllerExtension {
 				serverRunner.run();
 				popup("MusaLCEServer reloaded", false);
 			} else {
-				popup("Ignored action 'Restart': it does the action only when 'Osc Host' and 'Start Server' are both enabled", false);
+				popup("Ignored action 'Restart': server is not enabled", false);
 			}
 			
 		});
