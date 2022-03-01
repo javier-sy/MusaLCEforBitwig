@@ -1,4 +1,4 @@
-package com.musadsl;
+package org.musadsl.musalce4bitwig;
 
 import java.io.BufferedReader;
 import java.io.IOException;

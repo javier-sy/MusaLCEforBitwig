@@ -1,4 +1,4 @@
-package com.musadsl;
+package org.musadsl.musalce4bitwig;
 
 import java.io.IOException;
 import java.util.Map;
@@ -134,6 +134,13 @@ public class OscHandler {
 				"Sets the play position of the song", 
 				(source, message) -> { 
 					transport.playStartPosition().set((double)message.getDouble(0));
+				});
+
+		addressSpace.registerMethod("/musalce4bitwig/record", 
+				"*", 
+				"Enable recording", 
+				(source, message) -> { 
+					transport.record();
 				});
 
 		localserver = osc.createUdpServer(addressSpace);

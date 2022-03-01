@@ -1,4 +1,4 @@
-package com.musadsl;
+package org.musadsl.musalce4bitwig;
 
 import java.util.UUID;
 
