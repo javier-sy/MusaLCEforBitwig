@@ -19,6 +19,10 @@ import com.bitwig.extension.controller.api.Signal;
  * 
  * launchctl setenv BITWIG_DEBUG_PORT 5005
  * 
+ * LOGS:
+ * 
+ * tail -f $TMPDIR/musalceserver.log
+ * 
  */
 
 public class Controller extends ControllerExtension {
