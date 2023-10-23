@@ -30,7 +30,7 @@ public class MusaLCEforBitwigExtensionDefinition extends ControllerExtensionDefi
    @Override
    public String getVersion()
    {
-      return "0.1";
+      return "0.2";
    }
 
    @Override
@@ -54,7 +54,7 @@ public class MusaLCEforBitwigExtensionDefinition extends ControllerExtensionDefi
    @Override
    public int getRequiredAPIVersion()
    {
-      return 15;
+      return 18;
    }
 
    @Override

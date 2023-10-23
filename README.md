@@ -4,7 +4,7 @@
 
 This project is part of **Musa Live Coding Environment**.
 
-Musa Live Coding Environment is a suite of components to add a live coding environment based on [Musa-DSL](https://github.com/javier-sy/musa-dsl) to several DAW's (Ableton Live 11 or higher and Bitwig Studio 4 or higher, for the moment).
+Musa Live Coding Environment is a suite of components to add a live coding environment based on [Musa-DSL](https://github.com/javier-sy/musa-dsl) to several DAW's (Ableton Live 11 or higher and Bitwig Studio 5 or higher, for the moment).
 
 The suite is composed of:
 - Atom source code editor (where the user edits the source code of the composition and can submit commands to run on real-time).
@@ -13,7 +13,7 @@ The suite is composed of:
 - MusaLCEforLive Ableton Live Controller (that establishes the communication between Ableton Live and the server).
 - MusaLCEforBitwig Bitwig Studio Controller (that establishes the communication between Bitwig Studio and the server).
 
-You need also, of course, Ableton Live 11 or greater or Bitwig Studio 4 or greater.
+You need also, of course, Ableton Live 11 or greater or Bitwig Studio 5 or greater.
 
 MusaLCEforBitwig (this component) integrates with Bitwig Studio as a MIDI Controller Script.
 
@@ -33,4 +33,4 @@ Thanks to Jürgen Moßgraber ([Youtube Channel](https://www.youtube.com/channel/
 
 # License
 
-[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2022 [Javier Sánchez Yeste](https://yeste.studio), licensed under LGPL 3.0 License
+[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2023 [Javier Sánchez Yeste](https://yeste.studio), licensed under LGPL 3.0 License
