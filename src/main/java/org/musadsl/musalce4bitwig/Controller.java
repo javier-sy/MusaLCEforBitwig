@@ -11,9 +11,7 @@ import com.bitwig.extension.controller.ControllerExtension;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
-import com.bitwig.extension.controller.api.SettableBooleanValue;
 import com.bitwig.extension.controller.api.SettableStringValue;
-import com.bitwig.extension.controller.api.Signal;
 
 /* RECORDAR PARA PONER LA VARIABLE DE DEBUG:
  * 
