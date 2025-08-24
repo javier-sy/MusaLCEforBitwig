@@ -53,8 +53,8 @@
 						</goals>
 						<configuration>
 							<sourceFile>${project.build.directory}/${project.build.finalName}.jar</sourceFile>
-							<!-- <destinationFile>${project.build.directory}/MusaLCEforBitwig.bwextension</destinationFile> -->
-							<destinationFile>${bitwig.extension.directory}/MusaLCEforBitwig.bwextension</destinationFile>
+							<destinationFile>${project.build.directory}/MusaLCEforBitwig.bwextension</destinationFile>
+							<!-- <destinationFile>${bitwig.extension.directory}/MusaLCEforBitwig.bwextension</destinationFile>  -->
 						</configuration>
 					</execution>
 				</executions>
