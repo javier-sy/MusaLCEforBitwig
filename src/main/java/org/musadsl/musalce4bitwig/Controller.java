@@ -20,6 +20,7 @@ import com.bitwig.extension.controller.api.SettableStringValue;
  * LOGS:
  * 
  * tail -f $TMPDIR/musalceserver.log
+ * tail -f $TMPDIR/bitwig-javier/musalceserver.log
  * 
  */
 
@@ -119,8 +120,6 @@ public class Controller extends ControllerExtension {
 		popup("MusaLCE Initialized! (" + controllerName + ")", false);
 
 		controllers.add(this);
-		
-
 		
 		/* 
 		 * Controller Attributes: Osc Host, Clock Sender and Start Server toggles 

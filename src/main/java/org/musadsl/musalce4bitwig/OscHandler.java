@@ -22,6 +22,8 @@ public class OscHandler {
 
 	
 	/*
+	Algunos de los metodos de la API de Bitwig Studio que pueden ser utiles en el futuro:
+
 	final Project project = host.getProject();
 	final Transport transport = host.createTransport();
 	
