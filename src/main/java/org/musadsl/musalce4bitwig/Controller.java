@@ -6,11 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 import com.bitwig.extension.controller.ControllerExtension;
 import com.bitwig.extension.controller.api.ControllerHost;
 import com.bitwig.extension.controller.api.MidiIn;
 import com.bitwig.extension.controller.api.NoteInput;
+import com.bitwig.extension.controller.api.SettableRangedValue;
 import com.bitwig.extension.controller.api.SettableStringValue;
 
 /* RECORDAR PARA PONER LA VARIABLE DE DEBUG:
@@ -120,10 +125,32 @@ public class Controller extends ControllerExtension {
 		popup("MusaLCE Initialized! (" + controllerName + ")", false);
 
 		controllers.add(this);
-		
-		/* 
-		 * Controller Attributes: Osc Host, Clock Sender and Start Server toggles 
-		 * 
+
+		/*
+		 * OSC endpoints for the Pulso Bridge channel. Read from the
+		 * "Pulso Bridge" preferences category (named after the
+		 * controller these settings configure communication with);
+		 * changes trigger delayedRestart so the new values are picked
+		 * up on the next init(). The matching pref must be set on the
+		 * Pulso side (its "MusaLCE" category) for both ends to agree.
+		 *
+		 * The MusaLCEServer channel (10001 in / 11011 out) is NOT
+		 * exposed here — the Ruby server hardcodes those sockets and
+		 * has no override mechanism, so letting the user move the
+		 * extension side would only create a mismatch they could not
+		 * fix without editing the gem.
+		 */
+
+		readOscHostPref("Pulso Bridge send host", "127.0.0.1",
+				() -> controllerData.pulsoSendHost, v -> controllerData.pulsoSendHost = v);
+		readOscPortPref("Pulso Bridge send port (out)", 21012,
+				() -> controllerData.pulsoSendPort, v -> controllerData.pulsoSendPort = v);
+		readOscPortPref("Pulso Bridge listen port (in)", 20002,
+				() -> controllerData.pulsoListenPort, v -> controllerData.pulsoListenPort = v);
+
+		/*
+		 * Controller Attributes: Osc Host, Clock Sender and Start Server toggles
+		 *
 		 * */
 
 		host.getPreferences().getBooleanSetting("Osc Host", "Configuration", false).addValueObserver(newValue -> {
@@ -256,7 +283,7 @@ public class Controller extends ControllerExtension {
 		
 		if(controllerData.isOscHost) {
 			if(controllerData.portName != null) {
-				oscHandler = new OscHandler(host.getOscModule(), controllersData, host, host.createTransport());
+				oscHandler = new OscHandler(host.getOscModule(), controllersData, controllerData, host, host.createTransport());
 				log.info("controller", "Created OSC link for " + controllerName);
 			} else {
 				log.info("controller", "Skipped creation of OSC link because controller data is still uninitialized for " + controllerName);
@@ -392,5 +419,44 @@ public class Controller extends ControllerExtension {
 				TimeUnit.SECONDS.sleep(1);
 			} catch (InterruptedException e) { }
 		}
+	}
+
+	/**
+	 * Read a UDP port preference from the "OSC" category. Loads the
+	 * persisted value into the supplied setter immediately and wires an
+	 * observer that compares incoming changes against the current
+	 * controllerData value — fires delayedRestart() only on real changes.
+	 * Mirrors the boolean-pref pattern used by Osc Host / Clock Sender
+	 * but adapted for SettableRangedValue (port range 1024..65535).
+	 */
+	private void readOscPortPref(String label, int defaultValue, IntSupplier getter, IntConsumer setter) {
+		SettableRangedValue param = host.getPreferences().getNumberSetting(
+				label, "Pulso Bridge", 1024, 65535, 1, "", defaultValue);
+		int initial = (int) Math.round(param.getRaw());
+		setter.accept(initial);
+		param.addRawValueObserver(newRaw -> {
+			int nv = (int) Math.round(newRaw);
+			if (nv != getter.getAsInt()) {
+				setter.accept(nv);
+				delayedRestart();
+			}
+		});
+	}
+
+	/** String counterpart of {@link #readOscPortPref} for the send-host
+	 *  fields. 40 chars is enough for IPv4 literals, hostnames and
+	 *  short IPv6 addresses; long IPv6 forms are not expected in the
+	 *  localhost-only use cases this extension targets. */
+	private void readOscHostPref(String label, String defaultValue, Supplier<String> getter, Consumer<String> setter) {
+		SettableStringValue param = host.getPreferences().getStringSetting(
+				label, "Pulso Bridge", 40, defaultValue);
+		String initial = param.get();
+		setter.accept(initial);
+		param.addValueObserver(newValue -> {
+			if (!newValue.equals(getter.get())) {
+				setter.accept(newValue);
+				delayedRestart();
+			}
+		});
 	}
 }

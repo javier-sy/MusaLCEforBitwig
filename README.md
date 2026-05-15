@@ -33,4 +33,4 @@ Thanks to Jürgen Moßgraber ([Youtube Channel](https://www.youtube.com/channel/
 
 # License
 
-[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2023 [Javier Sánchez Yeste](https://yeste.studio), licensed under LGPL 3.0 License
+[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2026 [Javier Sánchez Yeste](https://yeste.studio), licensed under GPL 3.0 License

@@ -14,11 +14,21 @@ import com.bitwig.extension.controller.api.Transport;
 
 public class OscHandler {
 
+	// MusaLCEServer channel — fixed to match the Ruby server's
+	// hardcoded sockets (lib/daw.rb in musalce-server). Do not expose
+	// these as user preferences: without a matching override mechanism
+	// on the Ruby side, any divergence would simply break the link
+	// with no way for the user to fix it from inside Bitwig.
+	private static final String MUSALCE_SERVER_HOST = "localhost";
+	private static final int MUSALCE_SERVER_SEND_PORT = 11011;
+	private static final int MUSALCE_SERVER_LISTEN_PORT = 10001;
+
 	final private ControllerHost host;
 
 	private OscServer localserver;
 	private OscConnection musalceserver;
 	private Application application;
+	private MusaLCESurfaceRelay musaLCESurfaceRelay;
 
 	
 	/*
@@ -52,15 +62,15 @@ public class OscHandler {
 	transport.timeSignature();
 	*/
 
-	public OscHandler(OscModule osc, Map<String, ControllerData> controllers, ControllerHost host, Transport transport) {
+	public OscHandler(OscModule osc, Map<String, ControllerData> controllers, ControllerData ownData, ControllerHost host, Transport transport) {
 		this.host = host;
-		
+
 		application = host.createApplication();
-		
+
 		transport.isPlaying().markInterested();
 		transport.playStartPosition().markInterested();
-		
-		musalceserver = osc.connectToUdpServer("localhost", 11011, null);
+
+		musalceserver = osc.connectToUdpServer(MUSALCE_SERVER_HOST, MUSALCE_SERVER_SEND_PORT, null);
 
 		OscAddressSpace addressSpace = osc.createAddressSpace();
 		
@@ -145,9 +155,12 @@ public class OscHandler {
 					transport.record();
 				});
 
+		musaLCESurfaceRelay = new MusaLCESurfaceRelay(osc, host, addressSpace, musalceserver,
+				ownData.pulsoSendHost, ownData.pulsoSendPort, ownData.pulsoListenPort);
+
 		localserver = osc.createUdpServer(addressSpace);
 		try {
-			localserver.start(10001);
+			localserver.start(MUSALCE_SERVER_LISTEN_PORT);
 		} catch (IOException e) {
 			Controller.log.error("controller", e.getLocalizedMessage());
 		}
@@ -230,7 +243,12 @@ public class OscHandler {
 	
 	public void unlink() {
 		application.projectName().unsubscribe();
-		
+
+		if (musaLCESurfaceRelay != null) {
+			musaLCESurfaceRelay.unlink();
+			musaLCESurfaceRelay = null;
+		}
+
 		musalceserver = null;
 		localserver = null;
 		application = null;

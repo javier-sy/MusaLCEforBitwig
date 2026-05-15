@@ -6,7 +6,7 @@
 	<artifactId>lceforbitwig</artifactId>
 	<packaging>jar</packaging>
 	<name>MusaLCEforBitwig</name>
-	<version>0.2</version>
+	<version>0.3</version>
 	
 	<repositories>
        <repository>
@@ -55,6 +55,42 @@
 							<sourceFile>${project.build.directory}/${project.build.finalName}.jar</sourceFile>
 							<destinationFile>${project.build.directory}/MusaLCEforBitwig.bwextension</destinationFile>
 							<!-- <destinationFile>${bitwig.extension.directory}/MusaLCEforBitwig.bwextension</destinationFile>  -->
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>3.1.0</version>
+				<!-- Writes version.properties from `git describe`, so
+				     MusaLCEforBitwigExtensionDefinition.getVersion() can
+				     report the actual git tag (e.g. v0.2 or v0.2-4-gXYZ
+				     when past the tag) instead of a string hardcoded in
+				     the source. failifexecutionfails=false lets builds
+				     from environments without git fall through to the
+				     Java-side fallback. -->
+				<executions>
+					<execution>
+						<id>git-version</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<exec executable="git" outputproperty="git.tag.version" failifexecutionfails="false">
+									<arg value="describe"/>
+									<arg value="--tags"/>
+									<arg value="--always"/>
+									<arg value="--dirty"/>
+								</exec>
+								<mkdir dir="${project.build.outputDirectory}"/>
+								<echo file="${project.build.outputDirectory}/version.properties">version=${git.tag.version}${line.separator}</echo>
+								<echo>Wrote version: ${git.tag.version}</echo>
+							</target>
 						</configuration>
 					</execution>
 				</executions>
