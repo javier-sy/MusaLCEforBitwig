@@ -1,0 +1,23 @@
+# Configuración de versión para MusaLCEforBitwig
+TYPE="bwextension"
+PKG_NAME="MusaLCEforBitwig"
+VERSION_FILE="VERSION"
+TEST_COMMAND=""
+BUILD_COMMAND="mvn -q clean package"
+PUBLISH_PLATFORM="GitHub"
+
+# Detección de instalación local: Bitwig carga .bwextension desde la carpeta
+# Extensions. El .bwextension es un .jar; version.properties (escrito por
+# maven-antrun desde `git describe`) vive dentro. Comparamos contra el
+# describe ACTUAL del repo origen, no contra el VERSION del fichero —
+# porque un `local` tras commits sin tag produce un .bwextension con versión
+# tipo "v0.2-3-gXYZ", no con la versión del VERSION file. Así, tras `local`
+# el check da ✓ aunque HEAD no esté en un tag, y tras `publish` (que crea
+# el tag) ambos confluyen en la versión limpia.
+INSTALL_PATH='$HOME/Documents/Bitwig Studio/Extensions/MusaLCEforBitwig.bwextension'
+INSTALL_VERSION_CHECK='EXPECTED=$(cd "$PROJECT_DIR" && git describe --tags --always --dirty 2>/dev/null); [[ -n "$EXPECTED" ]] && [[ -f "$INSTALL_PATH" ]] && unzip -p "$INSTALL_PATH" version.properties 2>/dev/null | grep -q "^version=$EXPECTED\$"'
+
+# Build + copia a la carpeta Extensions de Bitwig. La copia es directa
+# (cp) y sobrescribe; si Bitwig está corriendo, hay que togglear el
+# controller en Settings → Controllers para que recoja el cambio.
+INSTALL_COMMAND='mkdir -p "$HOME/Documents/Bitwig Studio/Extensions" && cp -v target/musalceforbitwig-*.jar "$HOME/Documents/Bitwig Studio/Extensions/MusaLCEforBitwig.bwextension"'
