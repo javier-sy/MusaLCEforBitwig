@@ -23,21 +23,21 @@ import com.bitwig.extension.controller.api.ControllerHost;
  * space bound to UDP :10001)</h3>
  * <ul>
  *   <li><code>/musalce/surface/sync_request</code> (no args)</li>
- *   <li><code>/musalce/surface/state/message  id text</code></li>
- *   <li><code>/musalce/surface/state/enabled  id enabled</code></li>
- *   <li><code>/musalce/surface/state/value    id value</code></li>
- *   <li><code>/musalce/surface/state/range    id min max</code></li>
+ *   <li><code>/musalce/surface/state/message  event text</code></li>
+ *   <li><code>/musalce/surface/state/enabled  event enabled</code></li>
+ *   <li><code>/musalce/surface/state/value    event value</code></li>
+ *   <li><code>/musalce/surface/state/range    event min max</code></li>
  * </ul>
  *
  * <h3>Pulso &rarr; Server (handlers on a dedicated Pulso-side
  * address space bound to UDP :20002 by default)</h3>
  * <ul>
  *   <li><code>/musalce/surface/inventory/begin</code> (no args)</li>
- *   <li><code>/musalce/surface/inventory/add     id type</code></li>
- *   <li><code>/musalce/surface/inventory/remove  id</code></li>
+ *   <li><code>/musalce/surface/inventory/add     event type</code></li>
+ *   <li><code>/musalce/surface/inventory/remove  event</code></li>
  *   <li><code>/musalce/surface/inventory/end</code> (no args)</li>
  *   <li><code>/musalce/surface/state_request</code> (no args)</li>
- *   <li><code>/musalce/surface/trigger          id payload</code></li>
+ *   <li><code>/musalce/surface/trigger          event payload</code></li>
  * </ul>
  */
 public class MusaLCESurfaceRelay {
