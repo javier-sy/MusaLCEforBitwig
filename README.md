@@ -18,6 +18,8 @@ A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bi
 
 This component is the DAW-side endpoint. It is part of the **suite workflow** of MusaLCE — for the standalone REPL workflow (no server, no extension), see the [MusaLCEClientForVSCode README](https://github.com/javier-sy/MusaLCEClientForVSCode#readme).
 
+For the full architecture of the suite (component responsibilities, REPL DSL surface, `surface[:event]` examples, Stop/Play semantics, and the OSC handler + surface contracts in detail), see the canonical reference: [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md).
+
 ## Requirements
 
 - Bitwig Studio 5 or higher
