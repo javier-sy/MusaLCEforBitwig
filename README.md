@@ -135,6 +135,16 @@ launchctl setenv BITWIG_DEBUG_PORT 5005
 
 The displayed version comes from `version.properties`, populated at build time by `maven-antrun-plugin` from `git describe --tags --always --dirty`. A leading `v` in the tag is stripped (so `v0.2` shows as `0.2`). When built outside a git checkout, the version falls back to `0-dev`.
 
+## More from the MusaDSL ecosystem
+
+- [MusaDSL](https://musadsl.yeste.studio) — Ruby framework for algorithmic sound and musical composition.
+- [MusaLCE](https://musalce.yeste.studio) — live coding environment for Ableton Live and Bitwig Studio.
+- [Nota](https://nota.yeste.studio) — Claude Code plugin for AI-assisted MusaDSL composition.
+- **Pulso** — Stream Deck plugin for MusaLCE Surface controls *(upcoming)*.
+- **VST3 plugins** — collection of audio plugins for mixing and mastering *(upcoming)*.
+
+For the full map — descriptions, how they relate, which one to pick for what — see [musa-ecosystem.yeste.studio](https://musa-ecosystem.yeste.studio).
+
 ## Acknowledgements
 
 Thanks to Jürgen Moßgraber ([YouTube Channel](https://www.youtube.com/channel/UCMgtq3iKqYamt9C-xbxwjTA)) for his Bitwig Controller API Tutorial. It has been a great source for understanding the Bitwig API and starting this project.
