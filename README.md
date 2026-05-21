@@ -2,7 +2,7 @@
 
 **Bitwig Studio Controller Extension for the Musa Live Coding Environment.**
 
-A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bitwig Studio with the [musalce-server](https://github.com/javier-sy/musalce-server) Ruby gem. The score code you write in [Visual Studio Code](https://github.com/javier-sy/MusaLCEClientForVSCode) is evaluated by `musalce-server`, which uses this extension to drive Bitwig (MIDI clock sync, MIDI note output, optional Stream Deck surface relay via **Pulso Bridge** — [yeste.studio](https://yeste.studio)'s upcoming Stream Deck plugin for the MusaLCE Surface protocol; public release pending).
+A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bitwig Studio with the [musalce-server](https://github.com/javier-sy/musalce-server) Ruby gem. The score code you write in [Visual Studio Code](https://github.com/javier-sy/MusaLCEClientForVSCode) is evaluated by `musalce-server`, which uses this extension to drive Bitwig (MIDI clock sync, MIDI note output, and an optional MusaLCE Surface relay that connects to **Pulso Bridge** — the DAW-side component of [yeste.studio](https://yeste.studio)'s upcoming Pulso Stream Deck control system for music DAWs; public release pending).
 
 ## How it fits in the suite
 
@@ -73,9 +73,9 @@ The extension exposes three categories of preferences under *Settings → Contro
 
 ### Pulso Bridge
 
-These configure the OSC link between this extension and the **Pulso Bridge** controller (the bridge between MusaLCE Surface controls and the Stream Deck plugin). Setting them here is only useful if you also run Pulso; otherwise they are inert. The matching settings must be set on the Pulso side (its *MusaLCE* category) so both ends agree.
+These configure the OSC link between this extension and the **Pulso Bridge** controller — the DAW-side component of [yeste.studio](https://yeste.studio)'s Pulso, a Stream Deck control system for Bitwig (Ableton planned). Pulso's primary scope is generic DAW control (transport, tracks, devices, browser, parameter encoders) and is independent of MusaLCE; *optionally*, Pulso Bridge can relay the MusaLCE Surface protocol — that's the integration these settings configure. The matching settings must be set on the Pulso side (its *MusaLCE* category) so both ends agree.
 
-> **Note:** Pulso is [yeste.studio](https://yeste.studio)'s commercial Stream Deck plugin for the MusaLCE Surface protocol, currently in private development. Public release pending — the integration described here is implemented in this extension today and is exercised by users of the (pre-release) Pulso.
+> **Note:** Pulso is currently in private development; public release pending. The MusaLCE Surface relay described here is implemented in this extension today and is exercised by users of the (pre-release) Pulso.
 
 | Setting | Default | Purpose |
 |---|---|---|
@@ -103,7 +103,7 @@ The musalce-server channel is hardcoded on the gem side; this extension cannot b
 
 ## Pulso Bridge integration
 
-The class `MusaLCESurfaceRelay` (`src/main/java/.../MusaLCESurfaceRelay.java`) is a bidirectional verbatim relay between `musalce-server` and **Pulso Bridge** for the **Surface protocol** (`/musalce/surface/*`). It does not validate or aggregate — it just forwards. The protocol (inventory, state propagation, trigger dispatch) is implemented in this codebase and documented in the source file's javadoc; a high-level overview lives in [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md). The canonical wire-protocol spec will be linked here once Pulso publishes.
+The class `MusaLCESurfaceRelay` (`src/main/java/.../MusaLCESurfaceRelay.java`) is a bidirectional verbatim relay between `musalce-server` and **Pulso Bridge** for the **MusaLCE Surface protocol** (`/musalce/surface/*`) — one of several OSC surfaces Pulso Bridge speaks (the rest are Pulso's own DAW-control surfaces, unrelated to MusaLCE). The relay does not validate or aggregate — it just forwards. The protocol (inventory, state propagation, trigger dispatch) is implemented in this codebase and documented in the source file's javadoc; a high-level overview lives in [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md). The canonical wire-protocol spec will be linked here once Pulso publishes.
 
 In short: a Stream Deck button mapped to a MusaLCE Surface event reaches the score's `on :event do |payload| … end` handler through this extension.
 
@@ -140,7 +140,7 @@ The displayed version comes from `version.properties`, populated at build time b
 - [MusaDSL](https://musadsl.yeste.studio) — Ruby framework for algorithmic sound and musical composition.
 - [MusaLCE](https://musalce.yeste.studio) — live coding environment for Ableton Live and Bitwig Studio.
 - [Nota](https://nota.yeste.studio) — Claude Code plugin for AI-assisted MusaDSL composition.
-- **Pulso** — Stream Deck plugin for MusaLCE Surface controls *(upcoming)*.
+- **Pulso** — Stream Deck control for music DAWs (Bitwig today; Ableton planned), with MusaLCE Surface integration *(upcoming)*.
 
 For the full map — descriptions, how they relate, which one to pick for what — see [musa-ecosystem.yeste.studio](https://musa-ecosystem.yeste.studio).
 
