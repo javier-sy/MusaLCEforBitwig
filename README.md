@@ -1,8 +1,10 @@
 # MusaLCE for Bitwig
 
-**Bitwig Studio Controller Extension for the Musa Live Coding Environment.**
+**Bitwig Studio Controller Extension for the Musa Live Coding Environment Suite.**
 
-A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bitwig Studio with the [musalce-server](https://github.com/javier-sy/musalce-server) Ruby gem. The score code you write in [Visual Studio Code](https://github.com/javier-sy/MusaLCEClientForVSCode) is evaluated by `musalce-server`, which uses this extension to drive Bitwig (MIDI clock sync, MIDI note output, and an optional MusaLCE Surface relay that connects to **Pulso Bridge** — the DAW-side component of [yeste.studio](https://yeste.studio)'s upcoming Pulso Stream Deck control system for music DAWs; public release pending).
+A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bitwig Studio with the [musalce-server](https://github.com/javier-sy/musalce-server) Ruby gem. The score code you write in [Visual Studio Code](https://github.com/javier-sy/MusaLCEClientForVSCode) with [MusaLCEClientForVSCode](https://github.com/javier-sy/MusaLCEClientForVSCode) is evaluated by `musalce-server`, which uses this extension to drive Bitwig (MIDI clock sync, MIDI note output).
+
+It also allows to connect to **Pulso** — the [yeste.studio](https://yeste.studio)'s upcoming elgato Stream Deck workflow control system for DAWs (public release pending).
 
 ## How it fits in the suite
 
@@ -16,9 +18,9 @@ A Bitwig 5+ controller extension (Java, Bitwig Extension API 18) that bridges Bi
                                                                        [Stream Deck plugin]
 ```
 
-This component is the DAW-side endpoint. It is part of the **suite workflow** of MusaLCE — for the standalone REPL workflow (no server, no extension), see the [MusaLCEClientForVSCode README](https://github.com/javier-sy/MusaLCEClientForVSCode#readme).
+This component is the DAW-side endpoint. It is part of the **MusaLCE Server Suite** — for the standalone REPL workflow (no server, no extension), see the toolkit way in [MusaLCE website](https://musalce.yeste.studio).
 
-For the full architecture of the suite (component responsibilities, REPL DSL surface, `surface[:event]` examples, Stop/Play semantics, and the OSC handler + surface contracts in detail), see the canonical reference: [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md).
+For the full architecture of the suite see the canonical reference: [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md).
 
 ## Requirements
 
@@ -35,11 +37,11 @@ mvn package
 
 Build produces `target/MusaLCEforBitwig.bwextension`. Copy it to your Bitwig Extensions directory:
 
-| OS | Path |
-|---|---|
-| macOS | `~/Documents/Bitwig Studio/Extensions/` |
-| Linux | `~/Bitwig Studio/Extensions/` |
-| Windows | `%USERPROFILE%\Documents\Bitwig Studio\Extensions\` |
+| OS | Path | Status                            |
+|---|---|-----------------------------------|
+| macOS | `~/Documents/Bitwig Studio/Extensions/` | Works well                        |
+| Linux | `~/Bitwig Studio/Extensions/` | Not tested (testers are welcome!) |
+| Windows | `%USERPROFILE%\Documents\Bitwig Studio\Extensions\` | Not tested (testers are welcome!) |
 
 Quit and relaunch Bitwig (or toggle the controller in *Settings → Controllers*) to pick up the new build.
 
@@ -73,7 +75,7 @@ The extension exposes three categories of preferences under *Settings → Contro
 
 ### Pulso Bridge
 
-These configure the OSC link between this extension and the **Pulso Bridge** controller — the DAW-side component of [yeste.studio](https://yeste.studio)'s Pulso, a Stream Deck control system for Bitwig (Ableton planned). Pulso's primary scope is generic DAW control (transport, tracks, devices, browser, parameter encoders) and is independent of MusaLCE; *optionally*, Pulso Bridge can relay the MusaLCE Surface protocol — that's the integration these settings configure. The matching settings must be set on the Pulso side (its *MusaLCE* category) so both ends agree.
+These configure the OSC link between this extension and the **Pulso Bridge** controller — the DAW-side component of [yeste.studio](https://yeste.studio)'s Pulso, an elgato Stream Deck control system for Bitwig (Ableton planned). Pulso's primary scope is DAW workflow control (transport, tracks, devices, browser, parameter encoders) and is independent of MusaLCE; *optionally*, Pulso Bridge can relay the MusaLCE Surface protocol — that's the integration these settings configure. The matching settings must be set on the Pulso side (its *MusaLCE* category) so both ends agree.
 
 > **Note:** Pulso is currently in private development; public release pending. The MusaLCE Surface relay described here is implemented in this extension today and is exercised by users of the (pre-release) Pulso.
 
@@ -101,12 +103,6 @@ Settings under *Studio I/O Panel → MusaLCE* are stored per Bitwig project (not
 
 The musalce-server channel is hardcoded on the gem side; this extension cannot be made to talk on different ports without a matching change to `musalce-server/lib/daw.rb`.
 
-## Pulso Bridge integration
-
-The class `MusaLCESurfaceRelay` (`src/main/java/.../MusaLCESurfaceRelay.java`) is a bidirectional verbatim relay between `musalce-server` and **Pulso Bridge** for the **MusaLCE Surface protocol** (`/musalce/surface/*`) — one of several OSC surfaces Pulso Bridge speaks (the rest are Pulso's own DAW-control surfaces, unrelated to MusaLCE). The relay does not validate or aggregate — it just forwards. The protocol (inventory, state propagation, trigger dispatch) is implemented in this codebase and documented in the source file's javadoc; a high-level overview lives in [musalce-server/docs/architecture.md](https://github.com/javier-sy/musalce-server/blob/master/docs/architecture.md). The canonical wire-protocol spec will be linked here once Pulso publishes.
-
-In short: a Stream Deck button mapped to a MusaLCE Surface event reaches the score's `on :event do |payload| … end` handler through this extension.
-
 ## Server lifecycle
 
 When *Osc Host* and *Start Server* are both enabled, the extension spawns `musalce-server` as a child process on init and tears it down on exit. The *Reload* signal restarts the child cleanly (~1 second delay between stop and start).
@@ -126,14 +122,10 @@ tail -f $TMPDIR/musalceserver.log
 
 The controller name must be unique across enabled instances. If the rename popup says "*name already in use*", pick another or disable the conflicting instance first.
 
-For Java-level debugging:
+For Java-level debugging using Eclipse debugger:
 ```bash
 launchctl setenv BITWIG_DEBUG_PORT 5005
 ```
-
-## Versioning
-
-The displayed version comes from `version.properties`, populated at build time by `maven-antrun-plugin` from `git describe --tags --always --dirty`. A leading `v` in the tag is stripped (so `v0.2` shows as `0.2`). When built outside a git checkout, the version falls back to `0-dev`.
 
 ## Acknowledgements
 
