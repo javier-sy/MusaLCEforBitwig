@@ -133,4 +133,12 @@ Thanks to Jürgen Moßgraber ([YouTube Channel](https://www.youtube.com/channel/
 
 ## License
 
-[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2026 [Javier Sánchez Yeste](https://yeste.studio), licensed under GPL 3.0 License.
+MusaLCEforBitwig is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE).
+
+**What this means for you.** Composing, performing and publishing music made with MusaLCEforBitwig carries no obligation: the music is yours. The GPL applies to *software*: if you distribute a program that includes or is built on MusaLCEforBitwig, that program must be released under the GPL too, with its source.
+
+**Commercial license.** If you need MusaLCEforBitwig under terms its license does not cover — for instance, inside a closed product — yeste.studio offers a commercial license. Write to javier@yeste.studio.
+
+**Versions.** From 1.0.0, MusaLCEforBitwig follows [Semantic Versioning](https://semver.org): breaking changes only come with a new major version.
+
+[MusaLCEforBitwig](https://github.com/javier-sy/MusaLCEforBitwig) Copyright (c) 2021-2026 [yeste.studio](https://yeste.studio)
